@@ -3,7 +3,7 @@ import { mnemonicToSeed } from "bip39";
 import { derivePath } from "ed25519-hd-key";
 import { Keypair } from "@solana/web3.js";
 import nacl from "tweetnacl";
-import { buttonClass, addressBoxClass, containerClass } from "./walletStyles";
+import { buttonClass, addressBoxClass, containerClass } from "./util/walletStyles";
 
 export function SolanaWallet({ mnemonic, onAddressGenerated }) {
   const [currentIndex, setCurrentIndex] = useState(0);

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { mnemonicToSeed } from "bip39";
 import { Wallet, HDNodeWallet } from "ethers";
-import { buttonClass, addressBoxClass, containerClass } from "./walletStyles";
+import { buttonClass, addressBoxClass, containerClass } from "./util/walletStyles";
 
 export const EthWallet = ({ mnemonic, onAddressGenerated }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
