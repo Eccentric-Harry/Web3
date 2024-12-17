@@ -18,6 +18,8 @@ export function SolanaWallet({ mnemonic, onAddressGenerated }) {
           const derivedSeed = derivePath(path, seed.toString("hex")).key;
           const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey;
           const keypair = Keypair.fromSecretKey(secret);
+          console.log("Public Key:", keypair.publicKey.toBase58());
+          console.log("Private Key:", `[${keypair.secretKey}]`);
 
           setCurrentIndex(currentIndex + 1);
           setPublicKeys([...publicKeys, keypair.publicKey]);
