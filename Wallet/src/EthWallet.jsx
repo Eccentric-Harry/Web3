@@ -1,36 +1,35 @@
 import { useState } from "react";
 import { mnemonicToSeed } from "bip39";
 import { Wallet, HDNodeWallet } from "ethers";
+import { buttonClass, addressBoxClass, containerClass } from "./walletStyles";
 
-export const EthWallet = ({ mnemonic }) => {
+export const EthWallet = ({ mnemonic, onAddressGenerated }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [addresses, setAddresses] = useState([]);
 
   return (
-    <div className="w-full max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg mt-6">
+    <div className={containerClass}>
       <button
-        onClick={async function () {
+        onClick={async () => {
           const seed = await mnemonicToSeed(mnemonic);
           const derivationPath = `m/44'/60'/${currentIndex}'/0'`;
           const hdNode = HDNodeWallet.fromSeed(seed);
           const child = hdNode.derivePath(derivationPath);
-          const privateKey = child.privateKey;
-          const wallet = new Wallet(privateKey);
+          const wallet = new Wallet(child.privateKey);
+
           setCurrentIndex(currentIndex + 1);
           setAddresses([...addresses, wallet.address]);
+          onAddressGenerated(wallet.address);
         }}
-        className="w-full py-3 px-6 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
+        className={buttonClass}
       >
-        Add ETH wallet
+        Add ETH Wallet
       </button>
 
       {addresses.length > 0 && (
         <div className="mt-6 space-y-4">
           {addresses.map((address, index) => (
-            <div
-              key={index}
-              className="bg-gray-100 p-4 rounded-lg shadow-sm text-center text-sm font-medium text-gray-700 hover:shadow-md transition duration-300"
-            >
+            <div key={index} className={addressBoxClass}>
               <span className="block truncate">{`ETH - ${address}`}</span>
             </div>
           ))}

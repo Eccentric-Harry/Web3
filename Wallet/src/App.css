@@ -40,3 +40,33 @@
 .read-the-docs {
   color: #888;
 }
+
+/* App.css */
+
+/* Ensure the root and body take full height */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #111827; /* Same dark gray as the main container */
+  color: #f9fafb; /* Light text color */
+  font-family: 'Inter', sans-serif;
+}
+
+/* Remove margins/padding from all elements */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Center the main container and allow it to expand */
+.App {
+  min-height: 100vh; /* Full viewport height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #111827; /* Dark gray background */
+}
