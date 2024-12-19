@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./App.css";
-import DisplayMnemonic from "./DisplayMenmonic";
+import DisplayMnemonic from "./DisplayMnemonic";
 import generateMnemonicUtil from "./util/generateMnemonics";
 import { SolanaWallet } from "./SolanaWallet";
 import { EthWallet } from "./EthWallet";
@@ -38,7 +38,8 @@ function App() {
 
   return (
     <div className="App">
-      <h1 className="text-4xl font-bold text-center mb-6">Wallets</h1>
+      <h1 className="text-4xl font-bold text-center mb-6 mt-6">Blockchain Wallets</h1>
+
 
       <DisplayMnemonic
         mnemonics={mnemonics}
@@ -48,7 +49,8 @@ function App() {
       {isGenerated && (
         <>
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold">Mnemonics</h2>
+          <h2 className="text-2xl text-center font-bold mt-6">Mnemonics</h2>
+
             <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {mnemonics.map((word, index) => (
                 <li
@@ -61,7 +63,7 @@ function App() {
             </ul>
           </div>
 
-          <div className="mt-8 space-y-8">
+          <div className="mt-8 flex justify-between space-x-4">
             <SolanaWallet 
               mnemonic={mnemonics.join(" ")} 
               onAddressGenerated={(address) => {

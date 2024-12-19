@@ -11,7 +11,8 @@ export function SolanaWallet({ mnemonic, onAddressGenerated }) {
   const [balances, setBalances] = useState({});
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
-  const [errorMessages, setErrorMessages] = useState({}); // Track errors for each wallet
+  const [errorMessages, setErrorMessages] = useState({});
+  const [showSendForm, setShowSendForm] = useState(false); // Control the visibility of input fields
 
   const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
@@ -19,7 +20,6 @@ export function SolanaWallet({ mnemonic, onAddressGenerated }) {
     try {
       const lamports = await connection.getBalance(new PublicKey(publicKey));
       setBalances((prev) => ({ ...prev, [publicKey]: lamports / 1e9 }));
-      // Clear any error messages for balance fetching
       setErrorMessages((prev) => ({ ...prev, [publicKey]: "" }));
     } catch (error) {
       console.error("Error fetching balance:", error);
@@ -30,12 +30,9 @@ export function SolanaWallet({ mnemonic, onAddressGenerated }) {
   const sendSol = async (senderKeypair, recipientAddress, amountInSol) => {
     try {
       const senderPublicKey = senderKeypair.publicKey.toBase58();
-
-      // Fetch the sender's balance
       const balance = await connection.getBalance(senderKeypair.publicKey);
       const balanceInSol = balance / 1e9;
 
-      // Check for sufficient balance
       if (balanceInSol < amountInSol) {
         setErrorMessages((prev) => ({
           ...prev,
@@ -44,7 +41,6 @@ export function SolanaWallet({ mnemonic, onAddressGenerated }) {
         return;
       }
 
-      // Proceed with the transaction
       const transaction = new Transaction().add(
         SystemProgram.transfer({
           fromPubkey: senderKeypair.publicKey,
@@ -57,8 +53,6 @@ export function SolanaWallet({ mnemonic, onAddressGenerated }) {
       console.log("Transaction sent! Signature:", signature);
       await connection.confirmTransaction(signature, "confirmed");
       console.log("Transaction confirmed!");
-
-      // Clear any previous error
       setErrorMessages((prev) => ({ ...prev, [senderPublicKey]: "" }));
     } catch (error) {
       console.error("Error sending SOL:", error);
@@ -72,55 +66,85 @@ export function SolanaWallet({ mnemonic, onAddressGenerated }) {
 
   return (
     <div className={containerClass}>
-      <button
-        onClick={async () => {
-          const seed = await mnemonicToSeed(mnemonic);
-          const path = `m/44'/501'/${currentIndex}'/0'`;
-          const derivedSeed = derivePath(path, seed.toString("hex")).key;
-          const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey;
-          const keypair = Keypair.fromSecretKey(secret);
+<button
+  onClick={async () => {
+    const seed = await mnemonicToSeed(mnemonic);
+    const path = `m/44'/501'/${currentIndex}'/0'`;
+    const derivedSeed = derivePath(path, seed.toString("hex")).key;
+    const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey;
+    const keypair = Keypair.fromSecretKey(secret);
 
-          setCurrentIndex(currentIndex + 1);
-          setPublicKeys([...publicKeys, keypair]);
-          onAddressGenerated(keypair.publicKey.toBase58());
-        }}
-        className={buttonClass}
-      >
-        Add Solana Wallet
-      </button>
+    setCurrentIndex(currentIndex + 1);
+    setPublicKeys([...publicKeys, keypair]);
+    onAddressGenerated(keypair.publicKey.toBase58());
+  }}
+  className={`${buttonClass} my-[24px] mt-0 mb-0 ml-[3px]`} 
+>
+  Add SOL Wallet
+</button>
+
+
 
       {publicKeys.length > 0 && (
         <div className="mt-6 space-y-4">
           {publicKeys.map((keypair, index) => (
             <div key={index} className={addressBoxClass}>
               <span className="block truncate">{`Solana - ${keypair.publicKey.toBase58()}`}</span>
-              <button onClick={() => fetchBalance(keypair.publicKey)} className="btn btn-primary">Get Balance</button>
-              {balances[keypair.publicKey] && <p>Balance: {balances[keypair.publicKey]} SOL</p>}
-              <div>
-                <input
-                  type="text"
-                  placeholder="Recipient Address"
-                  value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
-                />
-                <input
-                  type="number"
-                  placeholder="Amount in SOL"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                />
+              <div className="flex justify-center space-x-4 mt-4">
+                {/* Balance Button */}
                 <button
-                  onClick={() => sendSol(keypair, recipient, amount)}
-                  className="btn btn-secondary bg-green-600"
+                  onClick={() => fetchBalance(keypair.publicKey)}
+                  className="btn btn-primary"
                 >
-                  Send
+                  Get Balance
                 </button>
-                {errorMessages[keypair.publicKey.toBase58()] && (
-                  <div className="text-red-500 my-2">
-                    {errorMessages[keypair.publicKey.toBase58()]}
-                  </div>
-                )}
+
+                {/* Send SOL Button */}
+                <button
+                  onClick={() => setShowSendForm(!showSendForm)} // Toggle input fields visibility
+                  className="btn btn-primary bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-32"
+                >
+                  Send SOL
+                </button>
               </div>
+
+              {/* Show Balance with 'SOL' unit */}
+              {balances[keypair.publicKey] !== undefined && (
+                <p className="mt-2 text-xl font-semibold text-blue-200">
+                  Balance: {balances[keypair.publicKey].toFixed(4)} SOL
+                </p>
+              )}
+
+              {/* Conditional Rendering for Send Form */}
+              {showSendForm && (
+                <div className="mt-4">
+                  <input
+                    type="text"
+                    placeholder="Recipient Address"
+                    value={recipient}
+                    onChange={(e) => setRecipient(e.target.value)}
+                    className="w-full h-12 p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Amount in SOL"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="w-full h-12 p-4 mt-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                  />
+                  <button
+                    onClick={() => sendSol(keypair, recipient, amount)}
+                    className="w-full h-12 mt-4 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    Send
+                  </button>
+                  {errorMessages[keypair.publicKey.toBase58()] && (
+                    <div className="text-red-500 my-2">
+                      {errorMessages[keypair.publicKey.toBase58()]}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

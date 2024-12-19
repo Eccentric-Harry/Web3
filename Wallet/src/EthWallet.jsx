@@ -6,10 +6,9 @@ import { buttonClass, addressBoxClass, containerClass } from "./util/walletStyle
 export const EthWallet = ({ mnemonic, onAddressGenerated }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [balances, setBalances] = useState({});
-  const [wallets, setWallets] = useState([]); // Store { address, privateKey, recipient, amount, errorMessage } pairs
+  const [wallets, setWallets] = useState([]); // Store wallet information
 
   const provider = new ethers.providers.AlchemyProvider("mainnet", "5lDXioJIdjfP6Zmq3Tm21XsiixvNQq3F");
-
 
   const fetchBalance = async (address) => {
     try {
@@ -52,88 +51,110 @@ export const EthWallet = ({ mnemonic, onAddressGenerated }) => {
       setWallets(newWallets);
     }
   };
-  
-  
 
   return (
     <div className={containerClass}>
       <button
-        onClick={async () => {
-          const seed = await mnemonicToSeed(mnemonic);
+  onClick={async () => {
+    const seed = await mnemonicToSeed(mnemonic);
 
-          // Use ethers.js HDNode for deriving keys
-          const hdNode = ethers.utils.HDNode.fromSeed(seed);
-          
-          // Derive address based on derivation path
-          const derivationPath = `m/44'/60'/${currentIndex}'/0'`;
-          const childNode = hdNode.derivePath(derivationPath);
+    // Use ethers.js HDNode for deriving keys
+    const hdNode = ethers.utils.HDNode.fromSeed(seed);
+    
+    // Derive address based on derivation path
+    const derivationPath = `m/44'/60'/${currentIndex}'/0'`;
+    const childNode = hdNode.derivePath(derivationPath);
 
-          // Create wallet using derived private key
-          const wallet = new ethers.Wallet(childNode.privateKey);
+    // Create wallet using derived private key
+    const wallet = new ethers.Wallet(childNode.privateKey);
 
-          // setWallets([...wallets, { address: wallet.address, privateKey: wallet.privateKey }]);
-          setWallets([...wallets, { 
-            address: wallet.address, 
-            privateKey: wallet.privateKey, 
-            recipient: "", 
-            amount: "" ,
-            errorMessage: ""
-          }]);
-          
-          // Update state with new address
-          setCurrentIndex(currentIndex + 1);
-          // setAddresses([...addresses, wallet.address]);
-          onAddressGenerated(wallet.address);
-        }}
-        className={buttonClass}
-      >
-        Add ETH Wallet
-      </button>
+    setWallets([...wallets, { 
+      address: wallet.address, 
+      privateKey: wallet.privateKey, 
+      recipient: "", 
+      amount: "",
+      errorMessage: "",
+      showInputs: false // Initially, inputs are hidden
+    }]);
+    
+    setCurrentIndex(currentIndex + 1);
+    onAddressGenerated(wallet.address);
+  }}
+  className={buttonClass} // Added my-2 for vertical margin
+>
+  Add ETH Wallet
+</button>
+
 
       {wallets.length > 0 && (
         <div className="mt-6 space-y-4">
-          {wallets.map(({ address, privateKey, recipient, amount }, index) => (
+          {wallets.map(({ address, privateKey, recipient, amount, showInputs }, index) => (
             <div key={index} className={addressBoxClass}>
-              <span className="block truncate">{`ETH - ${address}`}</span>
-              <button onClick={() => fetchBalance(address)} className="btn btn-primary">
-                Get Balance
-              </button>
-              {balances[address] && <p>Balance: {balances[address]} ETH</p>}
-              <div>
-                <input
-                  type="text"
-                  placeholder="Recipient Address"
-                  value={recipient}
-                  onChange={(e) => {
-                    const newWallets = [...wallets];
-                    newWallets[index].recipient = e.target.value;
-                    setWallets(newWallets);
-                  }}
-                />
-                <input
-                  type="number"
-                  placeholder="Amount in ETH"
-                  value={amount}
-                  onChange={(e) => {
-                    const newWallets = [...wallets];
-                    newWallets[index].amount = e.target.value;
-                    setWallets(newWallets);
-                  }}
-                />
-                <button
-                  onClick={() => sendEth(privateKey, recipient, amount, index)}
-                  className="btn btn-secondary"
-                >
-                  Send
+              <span className="block truncate">{`Ethereum - ${address}`}</span>
+              <div className="flex justify-center space-x-4 mt-4">
+                <button onClick={() => fetchBalance(address)} className="btn btn-primary">
+                  Get Balance
                 </button>
 
-                {wallets[index].errorMessage && (
-                  <div className="text-red-500 my-2">
-                    {wallets[index].errorMessage}
-                  </div>
-                )}
 
+                <button
+                  onClick={() => {
+                    const newWallets = [...wallets];
+                    newWallets[index].showInputs = !newWallets[index].showInputs; // Toggle visibility
+                    setWallets(newWallets);
+                  }}
+                  className="btn btn-primary bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-32"
+                >
+                  {showInputs ? "Cancel" : "Send ETH"}
+                </button>
               </div>
+
+              {/* Show Balance with 'ETH' unit */}
+              {balances[address] && (
+                <p className="mt-2 text-xl font-semibold text-blue-200">
+                  Balance: {balances[address]} ETH
+                </p>
+              )}
+
+              {/* Conditional Rendering for Send Form */}
+              {showInputs && (
+                <div className="mt-4">
+                  <input
+                    type="text"
+                    placeholder="Recipient Address"
+                    value={recipient}
+                    onChange={(e) => {
+                      const newWallets = [...wallets];
+                      newWallets[index].recipient = e.target.value;
+                      setWallets(newWallets);
+                    }}
+                    className="w-full h-12 p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Amount in ETH"
+                    value={amount}
+                    onChange={(e) => {
+                      const newWallets = [...wallets];
+                      newWallets[index].amount = e.target.value;
+                      setWallets(newWallets);
+                    }}
+                    className="w-full h-12 p-4 mt-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                  />
+                  <button
+                    onClick={() => sendEth(privateKey, recipient, amount, index)}
+                    className="w-full h-12 mt-4 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    Send
+                  </button>
+
+                  {wallets[index].errorMessage && (
+                    <div className="text-red-500 my-2">
+                      {wallets[index].errorMessage}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
