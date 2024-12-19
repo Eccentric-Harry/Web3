@@ -1,4 +1,3 @@
-// walletStyles.js
 export const buttonClass =
   "w-full py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300";
 export const addressBoxClass =
