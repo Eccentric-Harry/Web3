@@ -37,9 +37,8 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <h1 className="text-4xl font-bold text-center mb-6 mt-6">Blockchain Wallets</h1>
-
+    <div className="App px-4 sm:px-6 lg:px-8 py-6">
+      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 mt-6">Blockchain Wallets</h1>
 
       <DisplayMnemonic
         mnemonics={mnemonics}
@@ -49,7 +48,7 @@ function App() {
       {isGenerated && (
         <>
           <div className="space-y-6">
-          <h2 className="text-2xl text-center font-bold mt-6">Mnemonics</h2>
+            <h2 className="text-xl sm:text-2xl text-center font-bold mt-6">Mnemonics</h2>
 
             <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {mnemonics.map((word, index) => (
@@ -63,20 +62,26 @@ function App() {
             </ul>
           </div>
 
-          <div className="mt-8 flex justify-between space-x-4">
-            <SolanaWallet 
-              mnemonic={mnemonics.join(" ")} 
-              onAddressGenerated={(address) => {
-                setSolanaAddresses((prev) => [...prev, address]);
-              }}
-            />
-            <EthWallet 
-              mnemonic={mnemonics.join(" ")} 
-              onAddressGenerated={(address) => {
-                setEthAddresses((prev) => [...prev, address]);
-              }}
-            />
-          </div>
+          <div className="mt-8 flex flex-col sm:flex-row sm:justify-between sm:space-x-4 space-y-6 sm:space-y-0">
+  <div className="flex-1">
+    <SolanaWallet 
+      mnemonic={mnemonics.join(" ")} 
+      onAddressGenerated={(address) => {
+        setSolanaAddresses((prev) => [...prev, address]);
+      }}
+    />
+  </div>
+  
+  <div className="flex-1">
+    <EthWallet 
+      mnemonic={mnemonics.join(" ")} 
+      onAddressGenerated={(address) => {
+        setEthAddresses((prev) => [...prev, address]);
+      }}
+    />
+  </div>
+</div>
+
         </>
       )}
 

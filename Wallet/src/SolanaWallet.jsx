@@ -65,36 +65,34 @@ export function SolanaWallet({ mnemonic, onAddressGenerated }) {
   };
 
   return (
-    <div className={containerClass}>
-<button
-  onClick={async () => {
-    const seed = await mnemonicToSeed(mnemonic);
-    const path = `m/44'/501'/${currentIndex}'/0'`;
-    const derivedSeed = derivePath(path, seed.toString("hex")).key;
-    const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey;
-    const keypair = Keypair.fromSecretKey(secret);
+    <div className={`${containerClass} px-4 sm:px-6 lg:px-8 py-6`}>
+    <button
+      onClick={async () => {
+        const seed = await mnemonicToSeed(mnemonic);
+        const path = `m/44'/501'/${currentIndex}'/0'`;
+        const derivedSeed = derivePath(path, seed.toString("hex")).key;
+        const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey;
+        const keypair = Keypair.fromSecretKey(secret);
 
-    setCurrentIndex(currentIndex + 1);
-    setPublicKeys([...publicKeys, keypair]);
-    onAddressGenerated(keypair.publicKey.toBase58());
-  }}
-  className={`${buttonClass} my-[24px] mt-0 mb-0 ml-[3px]`} 
->
-  Add SOL Wallet
-</button>
-
-
+        setCurrentIndex(currentIndex + 1);
+        setPublicKeys([...publicKeys, keypair]);
+        onAddressGenerated(keypair.publicKey.toBase58());
+      }}
+      className={buttonClass}
+    >
+      Add SOL Wallet
+    </button>
 
       {publicKeys.length > 0 && (
         <div className="mt-6 space-y-4">
           {publicKeys.map((keypair, index) => (
-            <div key={index} className={addressBoxClass}>
-              <span className="block truncate">{`Solana - ${keypair.publicKey.toBase58()}`}</span>
-              <div className="flex justify-center space-x-4 mt-4">
+            <div key={index} className={`${addressBoxClass} p-4 sm:p-6`}>
+              <span className="block truncate text-center text-sm sm:text-base">{`Solana - ${keypair.publicKey.toBase58()}`}</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:space-x-4 mt-4">
                 {/* Balance Button */}
                 <button
                   onClick={() => fetchBalance(keypair.publicKey)}
-                  className="btn btn-primary"
+                  className="btn btn-primary w-full sm:w-auto mb-4 sm:mb-0"
                 >
                   Get Balance
                 </button>
@@ -102,7 +100,7 @@ export function SolanaWallet({ mnemonic, onAddressGenerated }) {
                 {/* Send SOL Button */}
                 <button
                   onClick={() => setShowSendForm(!showSendForm)} // Toggle input fields visibility
-                  className="btn btn-primary bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-32"
+                  className="btn btn-primary bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
                 >
                   Send SOL
                 </button>
@@ -117,7 +115,7 @@ export function SolanaWallet({ mnemonic, onAddressGenerated }) {
 
               {/* Conditional Rendering for Send Form */}
               {showSendForm && (
-                <div className="mt-4">
+                <div className="mt-4 space-y-4">
                   <input
                     type="text"
                     placeholder="Recipient Address"
@@ -139,7 +137,7 @@ export function SolanaWallet({ mnemonic, onAddressGenerated }) {
                     Send
                   </button>
                   {errorMessages[keypair.publicKey.toBase58()] && (
-                    <div className="text-red-500 my-2">
+                    <div className="text-red-500 my-2 text-center">
                       {errorMessages[keypair.publicKey.toBase58()]}
                     </div>
                   )}
